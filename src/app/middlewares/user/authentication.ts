@@ -7,28 +7,38 @@ class UserAuthentication extends BaseMiddleWare {
     res: Response,
     next: NextFunction,
   ): Promise<void> {
-    const extracted = this.Utils.Token.extract(req);
+    const extracted = this.Utils.Token.extractAccess(req);
 
     if (!extracted) {
-      this.responseHandler(res, this.UNAUTHORIZED_CODE, this.UNAUTHORIZED_MSG);
+      this.responseHandler(
+        res,
+        this.HTTP_STATUS.UNAUTHORIZED,
+        this.HTTP_MSG.UNAUTHORIZED,
+      );
       return;
     }
 
-    const decoded = this.Utils.Token.decodeAccess(extracted.token);
+    const decoded = this.Utils.Token.verifyAccess(extracted.token);
 
     if (!decoded) {
-      this.responseHandler(res, this.UNAUTHORIZED_CODE, this.UNAUTHORIZED_MSG);
+      this.responseHandler(
+        res,
+        this.HTTP_STATUS.UNAUTHORIZED,
+        this.HTTP_MSG.UNAUTHORIZED,
+      );
       return;
     }
 
-    const payload = decoded.payload as Record<string, unknown>;
-
-    const user = await this.Service.UserServices.GetUserByEmail.call(
-      payload.email as string,
+    const user = await this.Service.UserServices.getUserById.call(
+      decoded.payload.userId,
     );
 
     if (!user) {
-      this.responseHandler(res, this.UNAUTHORIZED_CODE, this.UNAUTHORIZED_MSG);
+      this.responseHandler(
+        res,
+        this.HTTP_STATUS.UNAUTHORIZED,
+        this.HTTP_MSG.UNAUTHORIZED,
+      );
       return;
     }
 

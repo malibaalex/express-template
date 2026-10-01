@@ -1,7 +1,7 @@
 import { Response } from "express";
 import Util from "@/core/utils/index.js";
 import Services from "@/database/services/index.js";
-import { HTTP_STATUS, HTTP_MSG } from "./constants.js";
+import { HTTP_MSG, HTTP_STATUS } from "../utils/constants.js";
 
 class Base {
   protected readonly Utils = Util;

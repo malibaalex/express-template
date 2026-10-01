@@ -8,7 +8,7 @@ class IdValidator extends BaseMiddleWare {
     next: NextFunction,
   ): Promise<void> {
     const schema = this.z.object({
-      id: this.z.string().uuid(),
+      id: this.z.uuid(),
     });
 
     this.paramHandler(req, res, next, schema);

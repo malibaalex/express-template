@@ -8,7 +8,7 @@ class SignupUserValidator extends BaseMiddleWare {
     next: NextFunction,
   ): Promise<void> {
     const schema = this.z.object({
-      fullname: this.z.string(),
+      fullName: this.z.string(),
       email: this.z.email(),
       password: this.z.string().min(6),
     });

@@ -28,20 +28,29 @@ class App extends Base {
   }
 
   private initDefaultRoute(): void {
-    this.app.get("/", (req: Request, res: Response) => {
-      this.responseHandler(res, this.SUCCESS_CODE, this.WELCOME_MSG);
-      return;
+    this.app.get("/", (_req: Request, res: Response) => {
+      this.responseHandler(
+        res,
+        this.HTTP_STATUS.SUCCESS,
+        this.HTTP_MSG.WELCOME,
+      );
     });
 
-    this.app.all("/", (req: Request, res: Response) => {
-      this.responseHandler(res, this.BAD_REQUEST_CODE, this.INVALID_METHOD_MSG);
-      return;
+    this.app.all("/", (_req: Request, res: Response) => {
+      this.responseHandler(
+        res,
+        this.HTTP_STATUS.METHOD_NOT_ALLOWED,
+        this.HTTP_MSG.INVALID_METHOD,
+      );
     });
 
-    this.app.use("*splat", (req: Request, res: Response) => {
-      this.responseHandler(res, this.NOT_FOUND_CODE, this.INVALID_ROUTE_MSG);
+    this.app.use("*splat", (_req: Request, res: Response) => {
+      this.responseHandler(
+        res,
+        this.HTTP_STATUS.NOT_FOUND,
+        this.HTTP_MSG.INVALID_ROUTE,
+      );
     });
-    return;
   }
 
   public listen(): void {

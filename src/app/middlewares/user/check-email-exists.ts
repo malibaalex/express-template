@@ -12,7 +12,11 @@ class CheckEmailExists extends BaseMiddleWare {
     const user = await this.Service.UserServices.GetUserByEmail.call(email);
 
     if (user) {
-      this.responseHandler(res, this.BAD_REQUEST_CODE, this.ALREAD_EXISTS_MSG);
+      this.responseHandler(
+        res,
+        this.HTTP_STATUS.CONFLICT,
+        this.HTTP_MSG.ALREADY_EXISTS,
+      );
     }
 
     return next();
