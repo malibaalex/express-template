@@ -12,7 +12,7 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET_KEY: z
     .string()
     .min(1, "JWT_REFRESH_SECRET_KEY is required"),
-  JWT_REFRESH__SECRET_KEY_EXPIRES_IN: z.coerce.number().default(604800),
+  JWT_REFRESH_SECRET_KEY_EXPIRES_IN: z.coerce.number().default(604800),
 });
 
 const parsed = envSchema.safeParse(process.env);

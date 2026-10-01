@@ -1,9 +1,6 @@
 import { Request, Response } from "express";
 import BaseController from "@/core/base/base-controller.js";
-import {
-  setAccessCookie,
-  setRefreshCookie,
-} from "@/core/utils/coockie-util.js";
+import omitProperty from "@/core/utils/omit-property.js";
 
 class RefreshTokenController extends BaseController {
   protected async module(
@@ -15,17 +12,17 @@ class RefreshTokenController extends BaseController {
     if (!incomingRefreshToken) {
       return this.responseHandler(
         res,
-        this.UNAUTHORIZED_CODE,
+        this.HTTP_STATUS.UNAUTHORIZED,
         "No refresh token",
       );
     }
 
     // verify signature + expiry
-    const decoded = this.Utils.Token.decodeRefresh(incomingRefreshToken);
+    const decoded = this.Utils.Token.verifyRefresh(incomingRefreshToken);
     if (!decoded) {
       return this.responseHandler(
         res,
-        this.UNAUTHORIZED_CODE,
+        this.HTTP_STATUS.UNAUTHORIZED,
         "Invalid refresh token",
       );
     }
@@ -38,7 +35,7 @@ class RefreshTokenController extends BaseController {
     if (!stored) {
       return this.responseHandler(
         res,
-        this.UNAUTHORIZED_CODE,
+        this.HTTP_STATUS.UNAUTHORIZED,
         "Refresh token revoked",
       );
     }
@@ -50,39 +47,50 @@ class RefreshTokenController extends BaseController {
       );
       return this.responseHandler(
         res,
-        this.UNAUTHORIZED_CODE,
+        this.HTTP_STATUS.UNAUTHORIZED,
         "Refresh token expired",
       );
     }
 
-    // rotate — revoke old, issue new
+    const user = await this.Service.UserServices.getUserById.call(
+      stored.userId,
+    );
+    if (!user) {
+      await this.Service.RefreshTokenServices.RevokeRefreshToken.call(
+        incomingRefreshToken,
+      );
+      return this.responseHandler(
+        res,
+        this.HTTP_STATUS.UNAUTHORIZED,
+        "User not found",
+      );
+    }
+
+    const userData = omitProperty(user, ["password", "salt", "status"]);
+
+    const newAccessToken = this.Utils.Token.signAccess({
+      payload: userData,
+    });
+    const newRefreshToken = this.Utils.Token.signRefresh({
+      userId: userData.userId,
+    });
+
+    await this.Service.RefreshTokenServices.SaveRefreshToken.call({
+      userId: user.userId,
+      token: newRefreshToken,
+    });
     await this.Service.RefreshTokenServices.RevokeRefreshToken.call(
       incomingRefreshToken,
     );
 
-    const payload = decoded.payload;
-    const newAccessToken = this.Utils.Token.generateAccess(payload);
-    const newRefreshToken = this.Utils.Token.generateRefresh({
-      userId: stored.user_id,
-    });
+    this.Utils.Cookie.setAccessCookie(res, newAccessToken);
+    this.Utils.Cookie.setRefreshCookie(res, newRefreshToken);
 
-    if (!newAccessToken || !newRefreshToken) {
-      return this.responseHandler(
-        res,
-        this.BAD_REQUEST_CODE,
-        this.BAD_REQUEST_MSG,
-      );
-    }
-
-    await this.Service.RefreshTokenServices.SaveRefreshToken.call({
-      userId: stored.user_id,
-      token: newRefreshToken,
-    });
-
-    setAccessCookie(res, newAccessToken);
-    setRefreshCookie(res, newRefreshToken);
-
-    return this.responseHandler(res, this.SUCCESS_CODE, this.SUCCESS_MSG);
+    return this.responseHandler(
+      res,
+      this.HTTP_STATUS.SUCCESS,
+      this.HTTP_MSG.SUCCESS,
+    );
   }
 }
 

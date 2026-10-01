@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import jwt from "jsonwebtoken";
 import type { Request } from "express";
 import type { Env } from "./env-utils.js";
@@ -13,7 +14,7 @@ type JwtEnv = Pick<
   | "JWT_ACCESS_SECRET_KEY"
   | "JWT_ACCESS_SECRET_KEY_EXPIRES_IN"
   | "JWT_REFRESH_SECRET_KEY"
-  | "JWT_REFRESH__SECRET_KEY_EXPIRES_IN"
+  | "JWT_REFRESH_SECRET_KEY_EXPIRES_IN"
 >;
 
 export type ExtractResult = { token: string; source: "cookie" | "header" };
@@ -29,7 +30,8 @@ class TokenUtils {
 
   signRefresh(payload: RefreshPayload): string {
     return jwt.sign(payload, this.env.JWT_REFRESH_SECRET_KEY, {
-      expiresIn: this.env.JWT_REFRESH__SECRET_KEY_EXPIRES_IN,
+      expiresIn: this.env.JWT_REFRESH_SECRET_KEY_EXPIRES_IN,
+      jwtid: randomUUID(), // guarantees a unique token even within the same second
     });
   }
 

@@ -4,24 +4,23 @@ export type Signup = {
   password: string;
 };
 
-export type JwtPayload = {
-  payload: {
-    userId: string;
-    fullName: string;
-    email: string;
-    createdAt: string;
-  };
-  iat: number;
-  exp: number;
-};
-
-export type LogIn = {
+export type SignIn = {
   email: string;
   fullName?: string;
   password: string;
 };
 
-export type RefreshPayload = { userId: string };
+export type JwtPayload = {
+  payload: {
+    userId: string;
+    email: string;
+    fullName: string;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+  iat: number;
+  exp: number;
+};
 
 export type AccessPayload = Omit<JwtPayload, "iat" | "exp">;
 

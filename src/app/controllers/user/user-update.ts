@@ -1,10 +1,6 @@
 import BaseControlller from "@/core/base/base-controller.js";
 import { User } from "@/generated/prisma/client.js";
 import { Request, Response } from "express";
-import {
-  setAccessCookie,
-  setRefreshCookie,
-} from "@/core/utils/coockie-util.js";
 
 class UpdateUserController extends BaseControlller {
   protected async module(
@@ -17,21 +13,21 @@ class UpdateUserController extends BaseControlller {
     if (!user) {
       return this.responseHandler(
         res,
-        this.UNAUTHORIZED_CODE,
-        this.UNAUTHORIZED_MSG,
+        this.HTTP_STATUS.UNAUTHORIZED,
+        this.HTTP_MSG.UNAUTHORIZED,
       );
     }
 
     const result = await this.Service.UserServices.UpdateUser.call({
       ...data,
-      user_id: user.user_id,
+      userId: user.userId,
     });
 
     if (!result) {
       return this.responseHandler(
         res,
-        this.BAD_REQUEST_CODE,
-        this.BAD_REQUEST_MSG,
+        this.HTTP_STATUS.BAD_REQUEST,
+        this.HTTP_MSG.BAD_REQUEST,
       );
     }
 
@@ -41,16 +37,18 @@ class UpdateUserController extends BaseControlller {
       "status",
     ]);
 
-    const accessToken = this.Utils.Token.generateAccess(userData);
-    const newRefreshToken = this.Utils.Token.generateRefresh({
-      userId: result.user_id,
+    const newAccessToken = this.Utils.Token.signAccess({
+      payload: userData,
+    });
+    const newRefreshToken = this.Utils.Token.signRefresh({
+      userId: result.userId,
     });
 
-    if (!accessToken || !newRefreshToken) {
+    if (!newAccessToken || !newRefreshToken) {
       return this.responseHandler(
         res,
-        this.BAD_REQUEST_CODE,
-        this.BAD_REQUEST_MSG,
+        this.HTTP_STATUS.BAD_REQUEST,
+        this.HTTP_MSG.BAD_REQUEST,
       );
     }
 
@@ -63,17 +61,17 @@ class UpdateUserController extends BaseControlller {
     }
 
     await this.Service.RefreshTokenServices.SaveRefreshToken.call({
-      userId: result.user_id,
+      userId: result.userId,
       token: newRefreshToken,
     });
 
-    setAccessCookie(res, accessToken);
-    setRefreshCookie(res, newRefreshToken);
+    this.Utils.Cookie.setAccessCookie(res, newAccessToken);
+    this.Utils.Cookie.setRefreshCookie(res, newRefreshToken);
 
     return this.responseHandler(
       res,
-      this.SUCCESS_CODE,
-      this.SUCCESS_MSG,
+      this.HTTP_STATUS.SUCCESS,
+      this.HTTP_MSG.SUCCESS,
       userData,
     );
   }

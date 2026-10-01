@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 
 import BaseController from "@/core/base/base-controller.js";
-import { clearAuthCookies } from "@/core/utils/coockie-util.js";
 
 class LogOutUserController extends BaseController {
   protected async module(
@@ -16,11 +15,11 @@ class LogOutUserController extends BaseController {
       );
     }
 
-    clearAuthCookies(res);
+    this.Utils.Cookie.clearAuthCookies(res);
 
     return this.responseHandler(
       res,
-      this.SUCCESS_CODE,
+      this.HTTP_STATUS.SUCCESS,
       "Logged out successfully",
     );
   }

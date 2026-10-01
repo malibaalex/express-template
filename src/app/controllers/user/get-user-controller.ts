@@ -13,8 +13,8 @@ class GetUserController extends BaseControlller {
     if (!user) {
       return this.responseHandler(
         res,
-        this.UNAUTHORIZED_CODE,
-        this.UNAUTHORIZED_MSG,
+        this.HTTP_STATUS.UNAUTHORIZED,
+        this.HTTP_MSG.UNAUTHORIZED,
       );
     }
 
@@ -26,8 +26,8 @@ class GetUserController extends BaseControlller {
 
     return this.responseHandler(
       res,
-      this.SUCCESS_CODE,
-      this.SUCCESS_MSG,
+      this.HTTP_STATUS.SUCCESS,
+      this.HTTP_MSG.SUCCESS,
       userData,
     );
   }
