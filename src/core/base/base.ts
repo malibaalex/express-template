@@ -1,42 +1,24 @@
 import { Response } from "express";
 import Util from "@/core/utils/index.js";
 import Services from "@/database/services/index.js";
+import { HTTP_STATUS, HTTP_MSG } from "./constants.js";
 
 class Base {
-  protected Utils;
-  protected Service;
-
-  constructor() {
-    this.Utils = Util;
-    this.Service = Services;
-  }
-
-  protected readonly SERVER_ERROR_CODE = 500;
-  protected readonly NOT_FOUND_CODE = 404;
-  protected readonly SUCCESS_CODE = 200;
-  protected readonly CREATED_CODE = 201;
-  protected readonly BAD_REQUEST_CODE = 400;
-  protected readonly UNAUTHORIZED_CODE = 401;
-  protected readonly CONFLICT_CODE = 409;
-
-  protected readonly SERVER_ERROR_MSG = "server error";
-  protected readonly NOT_FOUND_MSG = "not found";
-  protected readonly SUCCESS_MSG = "success";
-  protected readonly CREATED_MSG = "created succefully";
-  protected readonly BAD_REQUEST_MSG = "bad request";
-  protected readonly UNAUTHORIZED_MSG = "unauthorized";
-  protected readonly CONFLICT_MSG = "conflict";
-  protected readonly WELCOME_MSG = "welcome to the API";
-  protected readonly INVALID_ROUTE_MSG = "invalid route";
-  protected readonly INVALID_METHOD_MSG = "invalid method";
-  protected readonly ALREAD_EXISTS_MSG = "already exists";
+  protected readonly Utils = Util;
+  protected readonly Service = Services;
+  protected readonly HTTP_STATUS = HTTP_STATUS;
+  protected readonly HTTP_MSG = HTTP_MSG;
 
   protected listening(port: number | boolean): string {
     return `App listening on port ${port}`;
   }
 
-  protected welcome(req: Request, res: Response) {
-    return this.responseHandler(res, this.SUCCESS_CODE, this.WELCOME_MSG);
+  protected welcome(_req: Request, res: Response) {
+    return this.responseHandler(
+      res,
+      this.HTTP_STATUS.SUCCESS,
+      this.HTTP_MSG.WELCOME,
+    );
   }
 
   protected responseHandler(
@@ -45,11 +27,7 @@ class Base {
     message: string,
     data?: unknown,
   ): Response {
-    return res.status(httpCode).json({
-      status: httpCode,
-      message,
-      data,
-    });
+    return res.status(httpCode).json({ status: httpCode, message, data });
   }
 }
 
