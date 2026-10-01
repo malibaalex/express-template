@@ -19,6 +19,7 @@ class SiginUserService extends BaseService<LogIn, User> {
     );
 
     if (!isPassword) return null;
+
     return result;
   }
 }

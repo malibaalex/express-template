@@ -15,6 +15,7 @@ const Util = {
   Password,
   Token,
   Cookie,
+  env,
 } as const;
 
 export default Util;

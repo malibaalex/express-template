@@ -1,11 +1,13 @@
-import { prisma } from "@/database/system/db.js";
+import { prisma } from "./db.js";
 import { Page, Pagination } from "@/types/db.js";
 import Util from "@/core/utils/index.js";
 
 const { Password } = Util;
+const { env } = Util;
 
 abstract class BaseService<TData = unknown, TResult = unknown> {
   protected database = prisma;
+  protected env = env;
   protected Password = Password;
 
   protected readonly PAGE_SIZE = 10;

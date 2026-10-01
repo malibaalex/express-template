@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 
-import Base from "@/core/base/base.js";
+import Base from "./base.js";
 
 abstract class BaseControlller extends Base {
   protected abstract module(
@@ -14,7 +13,11 @@ abstract class BaseControlller extends Base {
       await this.module(req, res);
     } catch (error) {
       console.error("Controller execution error:", error);
-      this.responseHandler(res, this.SERVER_ERROR_CODE, this.SERVER_ERROR_MSG);
+      this.responseHandler(
+        res,
+        this.HTTP_STATUS.SERVER_ERROR,
+        this.HTTP_MSG.SERVER_ERROR,
+      );
       return;
     }
   }

@@ -16,8 +16,10 @@ class SaveRefreshTokenService extends BaseService<
     return await this.database.refreshToken.create({
       data: {
         token: data.token,
-        user_id: data.userId,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        userId: data.userId,
+        expiresAt: new Date(
+          Date.now() + this.env.JWT_REFRESH__SECRET_KEY_EXPIRES_IN * 1000,
+        ),
       },
     });
   }

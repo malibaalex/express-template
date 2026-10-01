@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { ZodSchema, ZodError, z } from "zod";
+import { ZodError, z } from "zod";
 
 import Base from "@/core/base/base.js";
 
@@ -10,7 +10,7 @@ abstract class BaseMiddleWare extends Base {
     req: Request,
     res: Response,
     next: NextFunction,
-    schema: ZodSchema,
+    schema: z.ZodType,
   ): Response | void {
     const result = schema.safeParse(req.body);
 
@@ -24,7 +24,7 @@ abstract class BaseMiddleWare extends Base {
     req: Request,
     res: Response,
     next: NextFunction,
-    schema: ZodSchema,
+    schema: z.ZodType,
   ): Response | void {
     const result = schema.safeParse(req.params);
 
@@ -38,7 +38,7 @@ abstract class BaseMiddleWare extends Base {
     req: Request,
     res: Response,
     next: NextFunction,
-    schema: ZodSchema,
+    schema: z.ZodType,
   ): Response | void {
     const result = schema.safeParse(req.query);
 
@@ -50,7 +50,7 @@ abstract class BaseMiddleWare extends Base {
 
   zodError(res: Response, error: ZodError): Response {
     const message = error.issues[0].message.replace(/[^a-zA-Z0-9 ]/g, "");
-    return this.responseHandler(res, this.BAD_REQUEST_CODE, message);
+    return this.responseHandler(res, this.HTTP_STATUS.BAD_REQUEST, message);
   }
 
   protected abstract middleware(
@@ -68,7 +68,11 @@ abstract class BaseMiddleWare extends Base {
       await this.middleware(req, res, next);
     } catch (error) {
       console.error("Middleware error:", error);
-      this.responseHandler(res, this.SERVER_ERROR_CODE, this.SERVER_ERROR_MSG);
+      this.responseHandler(
+        res,
+        this.HTTP_STATUS.SERVER_ERROR,
+        this.HTTP_MSG.SERVER_ERROR,
+      );
     }
   }
 }
