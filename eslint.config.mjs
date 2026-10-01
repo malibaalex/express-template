@@ -1,11 +1,13 @@
 import eslint from "@eslint/js";
+import { defineConfig, globalIgnores } from "eslint/config";
 import tseslint from "typescript-eslint";
 import prettierConfig from "eslint-config-prettier";
 import prettierPlugin from "eslint-plugin-prettier";
 
-export default tseslint.config(
+export default defineConfig(
+  globalIgnores(["dist", "node_modules"]),
   eslint.configs.recommended,
-  ...tseslint.configs.recommended,
+  tseslint.configs.recommended,
   {
     plugins: {
       prettier: prettierPlugin,
@@ -16,8 +18,5 @@ export default tseslint.config(
       "no-console": "off",
     },
   },
-  {
-    ignores: ["dist", "node_modules", "package.json"],
-  },
-  prettierConfig, // Must be last to override stylistic rules
+  prettierConfig,
 );

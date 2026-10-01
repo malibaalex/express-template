@@ -1,13 +1,13 @@
 export type Signup = {
   email: string;
-  fullname: string;
+  fullName: string;
   password: string;
 };
 
 export type JwtPayload = {
   payload: {
-    user_id: string;
-    name: string;
+    userId: string;
+    fullName: string;
     email: string;
     createdAt: string;
   };
@@ -17,15 +17,15 @@ export type JwtPayload = {
 
 export type LogIn = {
   email: string;
-  fullname?: string;
+  fullName?: string;
   password: string;
 };
 
-export type RefreshPayload = { user_id: string };
+export type RefreshPayload = { userId: string };
 
 export type AccessPayload = Omit<JwtPayload, "iat" | "exp">;
 
-export type RefreshPayload = { user_id: string };
+export type RefreshPayload = { userId: string };
 
 export type VerifiedRefreshPayload = RefreshPayload & {
   iat: number;
