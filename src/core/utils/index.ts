@@ -1,20 +1,20 @@
-import PasswordUtils from "@/core/utils/password-utils.js";
-import omitProperty from "@/core/utils/omit-property.js";
-import TokenUtils from "@/core/utils/token.js";
-import port from "@/core/utils/port.js";
+import PasswordUtils from "./password-utils.js";
+import omitProperty from "./omit-property.js";
+import { env } from "./env-utils.js";
+import TokenUtils from "./token.js";
+import { CookieUtils } from "./coockie-util.js";
+import port from "./port.js";
 
 const Password = new PasswordUtils();
-const Token = new TokenUtils();
+const Token = new TokenUtils(env);
+const Cookie = new CookieUtils(env);
 
-/**
- * Aggregated Utility object used by the Base class.
- * Note: .js extensions are mandatory for NodeNext resolution.
- */
 const Util = {
   port,
   omitProperty,
   Password,
   Token,
+  Cookie,
 } as const;
 
 export default Util;

@@ -1,54 +1,57 @@
 import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
-import { Request } from "express";
+import type { Request } from "express";
+import type { Env } from "./env-utils.js";
+import {
+  AccessPayload,
+  JwtPayload,
+  RefreshPayload,
+  VerifiedRefreshPayload,
+} from "@/types/user.js";
 
-dotenv.config();
+type JwtEnv = Pick<
+  Env,
+  | "JWT_ACCESS_SECRET_KEY"
+  | "JWT_ACCESS_SECRET_KEY_EXPIRES_IN"
+  | "JWT_REFRESH_SECRET_KEY"
+  | "JWT_REFRESH__SECRET_KEY_EXPIRES_IN"
+>;
 
-const { JWT_SECRET_KEY, JWT_REFRESH_SECRET_KEY } = process.env;
+export type ExtractResult = { token: string; source: "cookie" | "header" };
 
-export default class TokenUtils {
-  protected secret_key = JWT_SECRET_KEY;
-  protected refresh_secret_key = JWT_REFRESH_SECRET_KEY;
+class TokenUtils {
+  constructor(private readonly env: JwtEnv) {}
 
-  generateAccess(payload: Record<string, unknown>): string | null {
-    if (!Object.keys(payload).length) return null;
-    return jwt.sign({ payload }, this.secret_key as string, {
-      expiresIn: "15m",
+  signAccess(payload: AccessPayload): string {
+    return jwt.sign(payload, this.env.JWT_ACCESS_SECRET_KEY, {
+      expiresIn: this.env.JWT_ACCESS_SECRET_KEY_EXPIRES_IN,
     });
   }
 
-  generateRefresh(payload: Record<string, unknown>): string | null {
-    if (!Object.keys(payload).length) return null;
-    return jwt.sign({ payload }, this.refresh_secret_key as string, {
-      expiresIn: "7d",
+  signRefresh(payload: RefreshPayload): string {
+    return jwt.sign(payload, this.env.JWT_REFRESH_SECRET_KEY, {
+      expiresIn: this.env.JWT_REFRESH__SECRET_KEY_EXPIRES_IN,
     });
   }
 
-  decodeAccess(token: string): jwt.JwtPayload | null {
-    try {
-      const decoded = jwt.verify(token, this.secret_key as string);
-      if (typeof decoded === "string") return null; // narrow out the string case
-      return decoded;
-    } catch {
-      return null;
-    }
+  verifyAccess(token: string): JwtPayload | null {
+    return this.verify<JwtPayload>(token, this.env.JWT_ACCESS_SECRET_KEY);
   }
 
-  decodeRefresh(token: string): jwt.JwtPayload | null {
-    try {
-      const decoded = jwt.verify(token, this.refresh_secret_key as string);
-      if (typeof decoded === "string") return null;
-      return decoded;
-    } catch {
-      return null;
-    }
+  verifyRefresh(token: string): VerifiedRefreshPayload | null {
+    return this.verify<VerifiedRefreshPayload>(
+      token,
+      this.env.JWT_REFRESH_SECRET_KEY,
+    );
   }
 
-  extract(req: Request): { token: string; source: "cookie" | "header" } | null {
-    const fromCookie: string | undefined = req.cookies?.access_token;
-    if (fromCookie) return { token: fromCookie, source: "cookie" };
+  extractAccess(req: Request): ExtractResult | null {
+    const fromCookie = (req.cookies as Record<string, unknown> | undefined)
+      ?.access_token;
+    if (typeof fromCookie === "string") {
+      return { token: fromCookie, source: "cookie" };
+    }
 
-    const { authorization = "" } = req.headers;
+    const authorization = req.headers.authorization || "";
     if (authorization.startsWith("Bearer ")) {
       return { token: authorization.slice(7), source: "header" };
     }
@@ -57,6 +60,20 @@ export default class TokenUtils {
   }
 
   extractRefresh(req: Request): string | null {
-    return req.cookies?.refresh_token ?? null;
+    const fromCookie = (req.cookies as Record<string, unknown> | undefined)
+      ?.refresh_token;
+    return typeof fromCookie === "string" ? fromCookie : null;
+  }
+
+  private verify<T>(token: string, secret: string): T | null {
+    try {
+      const decoded = jwt.verify(token, secret);
+      if (!decoded || typeof decoded === "string") return null;
+      return decoded as unknown as T;
+    } catch {
+      return null;
+    }
   }
 }
+
+export default TokenUtils;

@@ -1,28 +1,41 @@
-import { pbkdf2Sync, randomBytes } from "crypto";
+import * as crypto from "crypto";
+import { promisify } from "util";
 
-export default class PasswordUtils {
-  private ITERATIONS = 100000;
-  private KEYLENGTH = 64;
-  private DIGEST = "sha512";
-  private ENCODING: BufferEncoding = "hex";
-  private SALT_LENGTH = 32;
+const pbkdf2 = promisify(crypto.pbkdf2);
 
-  salt(): string {
-    return randomBytes(this.SALT_LENGTH).toString(this.ENCODING);
-  }
+class PasswordUtils {
+  private readonly ITERATIONS = 210000;
+  private readonly KEY_LENGTH = 64;
+  private readonly DIGEST = "sha512";
 
-  hash(password: string, salt: string): string {
-    return pbkdf2Sync(
+  async hash(password: string): Promise<{ hash: string; salt: string }> {
+    const salt = crypto.randomBytes(16).toString("hex");
+    const derivedKey = await pbkdf2(
       password,
       salt,
       this.ITERATIONS,
-      this.KEYLENGTH,
+      this.KEY_LENGTH,
       this.DIGEST,
-    ).toString(this.ENCODING);
+    );
+    return { hash: derivedKey.toString("hex"), salt };
   }
 
-  compare(password: string, hashedPassword: string, salt: string): boolean {
-    const hash = this.hash(password, salt);
-    return hash === hashedPassword;
+  async compare(
+    password: string,
+    hash: string,
+    salt: string,
+  ): Promise<boolean> {
+    const derivedKey = await pbkdf2(
+      password,
+      salt,
+      this.ITERATIONS,
+      this.KEY_LENGTH,
+      this.DIGEST,
+    );
+    const stored = Buffer.from(hash, "hex");
+    if (stored.length !== derivedKey.length) return false;
+    return crypto.timingSafeEqual(derivedKey, stored);
   }
 }
+
+export default PasswordUtils;

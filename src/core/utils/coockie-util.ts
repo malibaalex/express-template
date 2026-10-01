@@ -1,28 +1,40 @@
-import { Response } from "express";
+import { Response, CookieOptions } from "express";
+import { Env } from "./env-utils.js";
 
-const IS_PROD = process.env.NODE_ENV === "production";
+type CookieEnv = Pick<
+  Env,
+  | "NODE_ENV"
+  | "JWT_ACCESS_SECRET_KEY_EXPIRES_IN"
+  | "JWT_REFRESH__SECRET_KEY_EXPIRES_IN"
+>;
 
-const BASE_OPTIONS = {
-  httpOnly: true,
-  secure: IS_PROD,
-  sameSite: "strict" as const,
-};
+export class CookieUtils {
+  private readonly options: CookieOptions;
 
-export const setAccessCookie = (res: Response, token: string): void => {
-  res.cookie("access_token", token, {
-    ...BASE_OPTIONS,
-    maxAge: 15 * 60 * 1000, // 15 minutes
-  });
-};
+  constructor(private readonly env: CookieEnv) {
+    this.options = {
+      httpOnly: true,
+      secure: env.NODE_ENV === "production",
+      sameSite: "strict",
+    };
+  }
 
-export const setRefreshCookie = (res: Response, token: string): void => {
-  res.cookie("refresh_token", token, {
-    ...BASE_OPTIONS,
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-  });
-};
+  setAccessCookie(res: Response, token: string): void {
+    res.cookie("access_token", token, {
+      ...this.options,
+      maxAge: this.env.JWT_ACCESS_SECRET_KEY_EXPIRES_IN * 1000, // cookie maxAge is ms
+    });
+  }
 
-export const clearAuthCookies = (res: Response): void => {
-  res.clearCookie("access_token", BASE_OPTIONS);
-  res.clearCookie("refresh_token", BASE_OPTIONS);
-};
+  setRefreshCookie(res: Response, token: string): void {
+    res.cookie("refresh_token", token, {
+      ...this.options,
+      maxAge: this.env.JWT_REFRESH__SECRET_KEY_EXPIRES_IN * 1000,
+    });
+  }
+
+  clearAuthCookies(res: Response): void {
+    res.clearCookie("access_token", this.options);
+    res.clearCookie("refresh_token", this.options);
+  }
+}

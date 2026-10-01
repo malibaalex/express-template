@@ -20,3 +20,14 @@ export type LogIn = {
   fullname?: string;
   password: string;
 };
+
+export type RefreshPayload = { user_id: string };
+
+export type AccessPayload = Omit<JwtPayload, "iat" | "exp">;
+
+export type RefreshPayload = { user_id: string };
+
+export type VerifiedRefreshPayload = RefreshPayload & {
+  iat: number;
+  exp: number;
+};
