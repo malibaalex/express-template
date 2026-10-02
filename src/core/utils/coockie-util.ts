@@ -5,7 +5,7 @@ type CookieEnv = Pick<
   Env,
   | "NODE_ENV"
   | "JWT_ACCESS_SECRET_KEY_EXPIRES_IN"
-  | "JWT_REFRESH__SECRET_KEY_EXPIRES_IN"
+  | "JWT_REFRESH_SECRET_KEY_EXPIRES_IN"
 >;
 
 export class CookieUtils {
@@ -29,7 +29,7 @@ export class CookieUtils {
   setRefreshCookie(res: Response, token: string): void {
     res.cookie("refresh_token", token, {
       ...this.options,
-      maxAge: this.env.JWT_REFRESH__SECRET_KEY_EXPIRES_IN * 1000,
+      maxAge: this.env.JWT_REFRESH_SECRET_KEY_EXPIRES_IN * 1000,
     });
   }
 
