@@ -6,17 +6,15 @@ FROM node:24-bookworm-slim AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
-# Corepack reads "packageManager" from package.json and installs that pnpm version.
 RUN corepack enable
 
 WORKDIR /app
 
 # ==============================================================================
-# STAGE 2: All dependencies
+# STAGE 2: Dependencies
 # ==============================================================================
 FROM base AS deps
 
-# pnpm-workspace.yaml holds the approved build scripts (prisma, esbuild, etc.).
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
@@ -25,17 +23,10 @@ RUN pnpm install --frozen-lockfile
 # ==============================================================================
 FROM deps AS build
 
-# --------------------------------------------------------------------------
-# SECURITY NOTE:
-# DATABASE_URL below is ONLY a dummy build-time value so Prisma config can
-# load during `prisma generate`.
-#
-# NEVER put a real database URL, password, API key, JWT secret, or other
-# credential here.
-#
-# Real secrets must be supplied at runtime through environment variables or
-# your deployment platform's secret manager.
-# --------------------------------------------------------------------------
+# SECURITY:
+# This is a dummy build-time value required by Prisma config.
+# Never put real credentials, API keys, or secrets in ARG/ENV here.
+# Runtime secrets must be injected by the deployment environment.
 ARG DATABASE_URL="postgresql://postgres:postgres@localhost:5432/build"
 ENV DATABASE_URL=$DATABASE_URL
 
@@ -45,7 +36,7 @@ RUN pnpm prisma:generate
 RUN pnpm build
 
 # ==============================================================================
-# STAGE 4: Production-only dependencies
+# STAGE 4: Production dependencies
 # ==============================================================================
 FROM base AS prod-deps
 
@@ -58,35 +49,20 @@ RUN pnpm install --frozen-lockfile --prod
 FROM node:24-bookworm-slim AS runtime
 
 ENV NODE_ENV=production
+
 WORKDIR /app
 
-# --------------------------------------------------------------------------
-# SECURITY NOTE:
-# NODE_ENV is safe to bake into the image.
-#
-# Do NOT add application secrets here, for example:
-#
-#   ENV DATABASE_URL="..."
-#   ENV JWT_ACCESS_SECRET="..."
-#   ENV JWT_REFRESH_SECRET="..."
-#   ENV API_KEY="..."
-#
-# Runtime secrets should be injected by Docker Compose, the hosting
-# platform, or another secret-management mechanism.
-# --------------------------------------------------------------------------
-
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN groupadd --system nodeapp && useradd --system --gid nodeapp nodeapp
+RUN groupadd --system nodeapp && \
+    useradd --system --gid nodeapp nodeapp
 
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY package.json ./
 
-USER nodeapp
+# SECURITY:
+# Do not bake DATABASE_URL, JWT secrets, API keys, or other credentials
+# into the image. Inject them at runtime through the hosting environment.
 
-EXPOSE 4001
+USER nodeapp
 
 CMD ["node", "dist/index.js"]
