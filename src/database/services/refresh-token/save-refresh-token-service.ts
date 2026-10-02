@@ -18,7 +18,7 @@ class SaveRefreshTokenService extends BaseService<
         token: data.token,
         userId: data.userId,
         expiresAt: new Date(
-          Date.now() + this.env.JWT_REFRESH__SECRET_KEY_EXPIRES_IN * 1000,
+          Date.now() + this.env.JWT_REFRESH_SECRET_KEY_EXPIRES_IN * 1000,
         ),
       },
     });
