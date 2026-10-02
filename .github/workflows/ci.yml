@@ -23,9 +23,11 @@ jobs:
 
     env:
       NODE_ENV: production
-      # Dummy value so Prisma config can load.
-      # No database connection is made during this job.
-      DATABASE_URL: postgresql://postgres:postgres123@localhost:5432/template_db
+
+      # Build-only dummy value required by Prisma config.
+      # No database connection is made during CI.
+      # NEVER replace this with a real database credential.
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/build
 
     steps:
       - name: Checkout code
@@ -58,6 +60,9 @@ jobs:
   # ============================================================================
   # 2. BUILD & PUSH DOCKER IMAGE
   #    Runs only after code quality checks pass on a direct push to develop.
+  #
+  #    The resulting image is deployment-provider agnostic and can be deployed
+  #    to a VPS or a serverless/container platform.
   # ============================================================================
   build-and-push:
     needs: lint-and-build
@@ -89,27 +94,3 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}:latest
             ghcr.io/${{ github.repository }}:${{ github.sha }}
-
-  # ============================================================================
-  # 3. DEPLOY TO SERVER
-  #    Optional. Uncomment when deployment infrastructure is configured.
-  # ============================================================================
-  #
-  # deploy:
-  #   needs: build-and-push
-  #   if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
-  #   runs-on: ubuntu-24.04
-  #
-  #   steps:
-  #     - name: Deploy
-  #       uses: appleboy/ssh-action@v1.2.0
-  #       with:
-  #         host: ${{ secrets.SERVER_HOST }}
-  #         username: ${{ secrets.SERVER_USER }}
-  #         key: ${{ secrets.SERVER_SSH_KEY }}
-  #         script: |
-  #           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-  #           cd /path/to/your/project
-  #           docker compose pull api
-  #           docker compose up -d
-  #           docker image prune -f
