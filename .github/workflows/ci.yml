@@ -18,7 +18,7 @@ jobs:
   # 1. LINT & BUILD (all pushes and PRs to develop)
   # ============================================================================
   build-and-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -66,7 +66,7 @@ jobs:
   # ============================================================================
   # Uncomment when you add your first integration tests.
   # integration-test:
-  #   runs-on: ubuntu-latest
+  #   runs-on: ubuntu-24.04
   #
   #   services:
   #     postgres:
@@ -87,7 +87,8 @@ jobs:
   #     NODE_ENV: test
   #     DATABASE_URL: postgresql://postgres:postgres@localhost:5432/app_db_test
   #     # Add any other env vars your app validates at startup, e.g.:
-  #     # JWT_SECRET: test-secret
+  #     # JWT_ACCESS_SECRET_KEY: test-access-secret
+  #     # JWT_REFRESH_SECRET_KEY: test-refresh-secret
   #
   #   steps:
   #     - name: Checkout code
@@ -115,37 +116,38 @@ jobs:
   #       run: pnpm test:integration
 
   # ============================================================================
-  # 3. BUILD & PUSH DOCKER IMAGE (Runs ONLY on direct pushes/merges to develop)
+  # 3. BUILD & PUSH DOCKER IMAGE (Runs ONLY on direct pushes to develop)
   # ============================================================================
-  # Uncomment once you have a Dockerfile with a 'runtime' target.
   # When integration-test is enabled, change needs to [build-and-test, integration-test].
-  # build-and-push:
-  #   needs: build-and-test
-  #   if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
-  #   runs-on: ubuntu-latest
-  #
-  #   permissions:
-  #     contents: read
-  #     packages: write
-  #
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-  #
-  #     - name: Log in to GitHub Container Registry
-  #       uses: docker/login-action@v3
-  #       with:
-  #         registry: ghcr.io
-  #         username: ${{ github.actor }}
-  #         password: ${{ secrets.GITHUB_TOKEN }}
-  #
-  #     - name: Build and push Docker image
-  #       uses: docker/build-push-action@v6
-  #       with:
-  #         context: .
-  #         target: runtime
-  #         push: true
-  #         tags: ghcr.io/${{ github.repository }}:latest
+  build-and-push:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: runtime
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ github.sha }}
 
   # ============================================================================
   # 4. DEPLOY TO SERVER (Runs ONLY after a successful push to GHCR)
@@ -154,7 +156,7 @@ jobs:
   # deploy:
   #   needs: build-and-push
   #   if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
-  #   runs-on: ubuntu-latest
+  #   runs-on: ubuntu-24.04
   #   steps:
   #     - name: Execute SSH Deployment
   #       uses: appleboy/ssh-action@v1.2.0

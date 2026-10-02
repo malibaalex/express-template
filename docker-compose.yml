@@ -8,7 +8,7 @@ services:
       target: runtime
     # Needed so `docker compose pull api` works in the deploy job.
     # Replace with your real GitHub owner/repo (lowercase).
-    image: ghcr.io/OWNER/REPO:latest
+    image: ghcr.io/owner/repo:latest
     ports:
       - "${PORT:-4001}:${PORT:-4001}"
     env_file:
