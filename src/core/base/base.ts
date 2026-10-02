@@ -10,6 +10,9 @@ class Base {
   protected readonly HTTP_MSG = HTTP_MSG;
 
   protected listening(port: number | boolean): string {
+    if (this.Utils.env.NODE_ENV === "development") {
+      console.log(`server running on port ${port}`);
+    }
     return `App listening on port ${port}`;
   }
 
