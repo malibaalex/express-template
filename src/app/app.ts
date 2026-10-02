@@ -1,11 +1,13 @@
-import express, { Response, Request, Application } from "express";
+import express, { Response, Request, NextFunction, Application } from "express";
 import cookieParser from "cookie-parser";
 
 import Base from "@/core/base/base.js";
 import { IRoute } from "@/types/app.js";
+import ErrorHandler from "./middlewares/error-handler.js";
 
 class App extends Base {
   private app: Application;
+  private errorHandler = new ErrorHandler();
 
   constructor(routes: IRoute[]) {
     super();
@@ -13,6 +15,7 @@ class App extends Base {
     this.initMiddlewares();
     this.initRoutes(routes);
     this.initDefaultRoute();
+    this.initErrorHandler(); // must be registered last
   }
 
   private initMiddlewares(): void {
@@ -51,6 +54,10 @@ class App extends Base {
         this.HTTP_MSG.INVALID_ROUTE,
       );
     });
+  }
+
+  private initErrorHandler(): void {
+    this.app.use(this.errorHandler.handle);
   }
 
   public listen(): void {
