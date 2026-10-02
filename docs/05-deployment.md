@@ -168,13 +168,16 @@ Local `pnpm dev` and Docker keep working because `VERCEL` is only set on Vercel.
 
 **2. Import the repo in Vercel** (dashboard or `vercel` CLI).
 
-**3. Set the build command** (Project Settings → Build and Deployment):
+**3. Add `vercel.json`** at the project root:
 
-```
-pnpm prisma:generate && pnpm build
+```json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm prisma:generate && pnpm build"
+}
 ```
 
-The Prisma client is generated into `src/generated/prisma` (gitignored), so it must be generated at build time.
+The Prisma client is generated into `src/generated/prisma` (gitignored), so it must be generated at build time. `vercel.json` is optional for Express in general, but it keeps this build command in the repo instead of the dashboard. (You can set the same command under Project Settings → Build and Deployment instead; if both are set, `vercel.json` takes precedence.)
 
 **4. Set environment variables** (Project Settings → Environment Variables). Add them for Production and Preview, and make sure they are available at build time, because `prisma.config.ts` reads `DATABASE_URL`:
 
