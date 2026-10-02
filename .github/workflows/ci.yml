@@ -15,10 +15,12 @@ concurrency:
 
 jobs:
   # ============================================================================
-  # 1. LINT & BUILD (all pushes and PRs to develop)
+  # 1. CODE QUALITY & BUILD
+  #    Checks linting, formatting, types, and production build
   # ============================================================================
-  build-and-test:
+  lint-and-build:
     runs-on: ubuntu-24.04
+
     strategy:
       fail-fast: false
       matrix:
@@ -26,7 +28,8 @@ jobs:
 
     env:
       NODE_ENV: test
-      # Dummy value so Prisma config loads. Nothing connects to it here.
+      # Dummy value so Prisma config loads.
+      # No database connection is made in this job.
       DATABASE_URL: postgresql://postgres:postgres123@localhost:5432/template_db
 
     steps:
@@ -57,71 +60,14 @@ jobs:
       - name: Type check / build
         run: pnpm build
 
-      # Uncomment when you add your first unit tests.
-      # - name: Unit tests
-      #   run: pnpm test:unit
-
   # ============================================================================
-  # 2. INTEGRATION TESTS (single Node version, real PostgreSQL)
+  # 2. BUILD & PUSH DOCKER IMAGE
+  #    Runs ONLY on direct pushes to develop
   # ============================================================================
-  # Uncomment when you add your first integration tests.
-  # integration-test:
-  #   runs-on: ubuntu-24.04
-  #
-  #   services:
-  #     postgres:
-  #       image: postgres:17-alpine
-  #       env:
-  #         POSTGRES_USER: postgres
-  #         POSTGRES_PASSWORD: postgres
-  #         POSTGRES_DB: app_db_test
-  #       ports:
-  #         - 5432:5432
-  #       options: >-
-  #         --health-cmd "pg_isready -U postgres"
-  #         --health-interval 10s
-  #         --health-timeout 5s
-  #         --health-retries 5
-  #
-  #   env:
-  #     NODE_ENV: test
-  #     DATABASE_URL: postgresql://postgres:postgres@localhost:5432/app_db_test
-  #     # Add any other env vars your app validates at startup, e.g.:
-  #     # JWT_ACCESS_SECRET_KEY: test-access-secret
-  #     # JWT_REFRESH_SECRET_KEY: test-refresh-secret
-  #
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-  #
-  #     - name: Set up pnpm
-  #       uses: pnpm/action-setup@v4
-  #
-  #     - name: Set up Node
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 24
-  #         cache: "pnpm"
-  #
-  #     - name: Install dependencies
-  #       run: pnpm install --frozen-lockfile
-  #
-  #     - name: Generate Prisma client
-  #       run: pnpm prisma:generate
-  #
-  #     - name: Apply migrations
-  #       run: pnpm exec prisma migrate deploy
-  #
-  #     - name: Integration tests
-  #       run: pnpm test:integration
-
-  # ============================================================================
-  # 3. BUILD & PUSH DOCKER IMAGE (Runs ONLY on direct pushes to develop)
-  # ============================================================================
-  # When integration-test is enabled, change needs to [build-and-test, integration-test].
   build-and-push:
-    needs: build-and-test
+    needs: lint-and-build
     if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+
     runs-on: ubuntu-24.04
 
     permissions:
@@ -150,18 +96,20 @@ jobs:
             ghcr.io/${{ github.repository }}:${{ github.sha }}
 
   # ============================================================================
-  # 4. DEPLOY TO SERVER (Runs ONLY after a successful push to GHCR)
+  # 3. DEPLOY TO SERVER
+  #    Runs ONLY after a successful Docker image push to GHCR
   # ============================================================================
-  # Uncomment (together with build-and-push) once your server and SSH secrets exist.
+  # Uncomment once your server and SSH secrets exist.
+  #
   # deploy:
   #   needs: build-and-push
   #   if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
   #   runs-on: ubuntu-24.04
+  #
   #   steps:
   #     - name: Execute SSH Deployment
   #       uses: appleboy/ssh-action@v1.2.0
   #       with:
-  #         # Secrets: SERVER_HOST, SERVER_USER, SERVER_SSH_KEY
   #         host: ${{ secrets.SERVER_HOST }}
   #         username: ${{ secrets.SERVER_USER }}
   #         key: ${{ secrets.SERVER_SSH_KEY }}

@@ -17,12 +17,7 @@
     "format:check": "prettier --check .",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:deploy": "prisma migrate deploy",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:unit": "vitest run --project unit",
-    "test:integration": "vitest run --project integration",
-    "test:coverage": "vitest run --coverage"
+    "prisma:deploy": "prisma migrate deploy"
   },
   "keywords": [],
   "author": "",
@@ -34,22 +29,18 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.0.0",
-    "@types/supertest": "^6.0.3",
-    "@vitest/coverage-v8": "^4.0.0",
     "eslint": "^10.2.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "nodemon": "^3.1.14",
     "prettier": "^3.8.1",
     "prisma": "^7.6.0",
-    "supertest": "^7.1.4",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.10",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2",
-    "typescript-eslint": "^8.58.0",
-    "vitest": "^4.0.0"
+    "typescript-eslint": "^8.58.0"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.6.0",
