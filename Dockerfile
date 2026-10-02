@@ -12,11 +12,12 @@ RUN corepack enable
 WORKDIR /app
 
 # ==============================================================================
-# STAGE 2: All dependencies (cached until package.json or the lockfile changes)
+# STAGE 2: All dependencies (cached until package.json, lockfile or workspace file changes)
 # ==============================================================================
 FROM base AS deps
 
-COPY package.json pnpm-lock.yaml ./
+# pnpm-workspace.yaml holds the approved build scripts (prisma, esbuild, etc.)
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 # ==============================================================================
@@ -39,7 +40,7 @@ RUN pnpm build
 # ==============================================================================
 FROM base AS prod-deps
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile --prod
 
 # ==============================================================================
