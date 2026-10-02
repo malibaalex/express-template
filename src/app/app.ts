@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import express, { Response, Request, NextFunction, Application } from "express";
 import cookieParser from "cookie-parser";
 

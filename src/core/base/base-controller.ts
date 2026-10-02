@@ -8,7 +8,7 @@ abstract class BaseControlller extends Base {
     res: Response,
   ): Promise<void | Response>;
 
-  public async execute(req: Request, res: Response): Promise<void | any> {
+  public async execute(req: Request, res: Response): Promise<void | unknown> {
     try {
       await this.module(req, res);
     } catch (error) {
