@@ -16,7 +16,7 @@ concurrency:
 jobs:
   # ============================================================================
   # 1. CODE QUALITY & BUILD
-  #    Verify that the code is clean, formatted, type-safe, and buildable.
+  #    Verify that the code is clean, formatted, type-safe, tested, and buildable.
   # ============================================================================
   lint-and-build:
     runs-on: ubuntu-24.04
@@ -53,6 +53,14 @@ jobs:
 
       - name: Format check
         run: pnpm format:check
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test:coverage
+        env:
+          NODE_ENV: test
 
       - name: Build
         run: pnpm build
