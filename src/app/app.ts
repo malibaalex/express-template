@@ -66,6 +66,10 @@ class App extends Base {
       this.listening(this.Utils.port);
     });
   }
+
+  public get instance(): Application {
+    return this.app;
+  }
 }
 
 export default App;
