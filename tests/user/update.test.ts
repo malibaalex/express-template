@@ -24,6 +24,7 @@ describe("PUT /update/:id", () => {
     expect(res.status).toBe(200);
     expect(JSON.stringify(profile.body)).toContain(updatedEmail);
   });
+
   it("returns 400 for invalid data", async () => {
     const agent = browser();
     await agent.post(ROUTES.signup).send(newUser());

@@ -14,20 +14,27 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ============================================================================
-  # 1. CODE QUALITY & BUILD
-  #    Verify that the code is clean, formatted, type-safe, tested, and buildable.
-  # ============================================================================
   lint-and-build:
     runs-on: ubuntu-24.04
 
-    env:
-      NODE_ENV: production
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d test_db"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
 
-      # Build-only dummy value required by Prisma config.
-      # No database connection is made during CI.
-      # NEVER replace this with a real database credential.
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/build
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
 
     steps:
       - name: Checkout code
@@ -35,9 +42,11 @@ jobs:
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v6
+        with:
+          version: 10
 
       - name: Set up Node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
@@ -47,6 +56,9 @@ jobs:
 
       - name: Generate Prisma client
         run: pnpm prisma:generate
+
+      - name: Deploy database migrations
+        run: pnpm prisma migrate deploy
 
       - name: Lint
         run: pnpm lint
@@ -59,23 +71,13 @@ jobs:
 
       - name: Test
         run: pnpm test:coverage
-        env:
-          NODE_ENV: test
 
       - name: Build
         run: pnpm build
 
-  # ============================================================================
-  # 2. BUILD & PUSH DOCKER IMAGE
-  #    Runs only after code quality checks pass on a direct push to develop.
-  #
-  #    The resulting image is deployment-provider agnostic and can be deployed
-  #    to a VPS or a serverless/container platform.
-  # ============================================================================
   build-and-push:
     needs: lint-and-build
     if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
-
     runs-on: ubuntu-24.04
 
     permissions:
