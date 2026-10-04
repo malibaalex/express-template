@@ -2,7 +2,7 @@ import BaseService from "@/database/system/base-service.js";
 import { type User } from "@/generated/prisma/client.js";
 import type { SignIn } from "@/types/user.js";
 
-class SiginUserService extends BaseService<SignIn, User> {
+class SignInUserService extends BaseService<SignIn, User> {
   protected async transaction(data: SignIn): Promise<User | null> {
     const result = await this.database.user.findUnique({
       where: {
@@ -12,7 +12,7 @@ class SiginUserService extends BaseService<SignIn, User> {
 
     if (!result) return null;
 
-    const isPassword = this.Password.compare(
+    const isPassword = await this.Password.compare(
       data.password,
       result.password,
       result.salt,
@@ -24,4 +24,4 @@ class SiginUserService extends BaseService<SignIn, User> {
   }
 }
 
-export default SiginUserService;
+export default SignInUserService;

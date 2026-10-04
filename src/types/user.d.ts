@@ -10,6 +10,13 @@ export type SignIn = {
   password: string;
 };
 
+export type UpdateUser = {
+  userId: string;
+  email?: string;
+  fullName?: string;
+  password?: string;
+};
+
 export type JwtPayload = {
   payload: {
     userId: string;
