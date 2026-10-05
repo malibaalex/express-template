@@ -16,8 +16,8 @@ Set these in `.env`. They are validated at startup in `src/core/utils/env-utils.
 | `DATABASE_URL` | yes | | Postgres connection string |
 | `JWT_ACCESS_SECRET_KEY` | yes | | Generate with `openssl rand -base64 48` |
 | `JWT_REFRESH_SECRET_KEY` | yes | | Same, use a different value |
-| `JWT_ACCESS_SECRET_KEY_EXPIRES_IN` | no | `900` | Seconds (15 min) |
-| `JWT_REFRESH_SECRET_KEY_EXPIRES_IN` | no | `604800` | Seconds (7 days) |
+| `JWT_ACCESS_SECRET_KEY_EXPIRES_IN` | yes | `900` | Seconds (15 min) |
+| `JWT_REFRESH_SECRET_KEY_EXPIRES_IN` | yes | `604800` | Seconds (7 days) |
 | `PORT` | no | `4001` | |
 | `NODE_ENV` | no | `development` | `production` turns on secure cookies |
 | `DB_USER`, `DB_PASSWORD`, `DB_NAME` | Compose only | | Create the local Postgres container |

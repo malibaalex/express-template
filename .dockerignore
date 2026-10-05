@@ -8,3 +8,6 @@ dist
 coverage
 .github
 docs
+tests 
+coverage 
+vitest.config.ts
