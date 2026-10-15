@@ -19,20 +19,12 @@ class ErrorHandler extends Base {
     // so return 400 instead of a misleading 500.
     const status = (err as { status?: number }).status;
     if (status === 400) {
-      return this.responseHandler(
-        res,
-        this.HTTP_STATUS.BAD_REQUEST,
-        this.HTTP_MSG.BAD_REQUEST,
-      );
+      return this.responseHandler(res, this.HTTP_STATUS.BAD_REQUEST, this.HTTP_MSG.BAD_REQUEST);
     }
 
     console.error(err);
 
-    return this.responseHandler(
-      res,
-      this.HTTP_STATUS.SERVER_ERROR,
-      this.HTTP_MSG.SERVER_ERROR,
-    );
+    return this.responseHandler(res, this.HTTP_STATUS.SERVER_ERROR, this.HTTP_MSG.SERVER_ERROR);
   };
 }
 

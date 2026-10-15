@@ -2,11 +2,11 @@
 
 Pick one path:
 
-| Option | Runs | Best for |
-|---|---|---|
-| A. VPS | Docker image + Compose | Full control, predictable cost |
-| B. Container platform | Docker image | Managed hosting, same image as A |
-| C. Vercel | Source code as a function | Small APIs, git-push deploys |
+| Option                | Runs                      | Best for                         |
+| --------------------- | ------------------------- | -------------------------------- |
+| A. VPS                | Docker image + Compose    | Full control, predictable cost   |
+| B. Container platform | Docker image              | Managed hosting, same image as A |
+| C. Vercel             | Source code as a function | Small APIs, git-push deploys     |
 
 A and B use the same Docker image. CI builds it and pushes it to `ghcr.io/<owner>/<repo>` on every push to `develop`, but only if lint, format, typecheck, tests and build all pass. C doesn't use the image at all.
 
@@ -62,13 +62,13 @@ Don't deploy the Compose `db` or `migrate` services, and don't carry over volume
 
 **4. Set environment variables in the platform's secret store.**
 
-| Variable | Value |
-|---|---|
-| `DATABASE_URL` | Managed DB connection string |
-| `JWT_ACCESS_SECRET_KEY` | secret |
-| `JWT_REFRESH_SECRET_KEY` | secret |
-| `NODE_ENV` | `production` |
-| `JWT_*_EXPIRES_IN` | optional |
+| Variable                 | Value                        |
+| ------------------------ | ---------------------------- |
+| `DATABASE_URL`           | Managed DB connection string |
+| `JWT_ACCESS_SECRET_KEY`  | secret                       |
+| `JWT_REFRESH_SECRET_KEY` | secret                       |
+| `NODE_ENV`               | `production`                 |
+| `JWT_*_EXPIRES_IN`       | optional                     |
 
 **5. Run migrations before the new revision gets traffic.** The runtime image has no Prisma CLI, so run them from CI or the platform's release command:
 

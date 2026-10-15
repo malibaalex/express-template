@@ -2,12 +2,7 @@ import { randomUUID } from "node:crypto";
 import jwt from "jsonwebtoken";
 import type { Request } from "express";
 import type { Env } from "./env-utils.js";
-import {
-  AccessPayload,
-  JwtPayload,
-  RefreshPayload,
-  VerifiedRefreshPayload,
-} from "@/types/user.js";
+import { AccessPayload, JwtPayload, RefreshPayload, VerifiedRefreshPayload } from "@/types/user.js";
 
 type JwtEnv = Pick<
   Env,
@@ -40,15 +35,11 @@ class TokenUtils {
   }
 
   verifyRefresh(token: string): VerifiedRefreshPayload | null {
-    return this.verify<VerifiedRefreshPayload>(
-      token,
-      this.env.JWT_REFRESH_SECRET_KEY,
-    );
+    return this.verify<VerifiedRefreshPayload>(token, this.env.JWT_REFRESH_SECRET_KEY);
   }
 
   extractAccess(req: Request): ExtractResult | null {
-    const fromCookie = (req.cookies as Record<string, unknown> | undefined)
-      ?.access_token;
+    const fromCookie = (req.cookies as Record<string, unknown> | undefined)?.access_token;
     if (typeof fromCookie === "string") {
       return { token: fromCookie, source: "cookie" };
     }
@@ -62,8 +53,7 @@ class TokenUtils {
   }
 
   extractRefresh(req: Request): string | null {
-    const fromCookie = (req.cookies as Record<string, unknown> | undefined)
-      ?.refresh_token;
+    const fromCookie = (req.cookies as Record<string, unknown> | undefined)?.refresh_token;
     return typeof fromCookie === "string" ? fromCookie : null;
   }
 

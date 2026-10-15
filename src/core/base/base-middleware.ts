@@ -57,22 +57,14 @@ abstract class BaseMiddleWare extends Base {
     req: Request,
     res: Response,
     next: NextFunction,
-  ): void;
+  ): void | Promise<void>;
 
-  public async run(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
+  public async run(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       await this.middleware(req, res, next);
     } catch (error) {
       console.error("Middleware error:", error);
-      this.responseHandler(
-        res,
-        this.HTTP_STATUS.SERVER_ERROR,
-        this.HTTP_MSG.SERVER_ERROR,
-      );
+      this.responseHandler(res, this.HTTP_STATUS.SERVER_ERROR, this.HTTP_MSG.SERVER_ERROR);
     }
   }
 }

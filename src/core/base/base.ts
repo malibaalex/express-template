@@ -17,11 +17,7 @@ class Base {
   }
 
   protected welcome(_req: Request, res: Response) {
-    return this.responseHandler(
-      res,
-      this.HTTP_STATUS.SUCCESS,
-      this.HTTP_MSG.WELCOME,
-    );
+    return this.responseHandler(res, this.HTTP_STATUS.SUCCESS, this.HTTP_MSG.WELCOME);
   }
 
   protected responseHandler(

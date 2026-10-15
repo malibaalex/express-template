@@ -2,11 +2,7 @@ import BaseMiddleWare from "@/core/base/base-middleware.js";
 import { Request, Response, NextFunction } from "express";
 
 class SignupUserValidator extends BaseMiddleWare {
-  protected async middleware(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
+  protected async middleware(req: Request, res: Response, next: NextFunction): Promise<void> {
     const schema = this.z.object({
       fullName: this.z.string(),
       email: this.z.email(),

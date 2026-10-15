@@ -6,20 +6,13 @@ interface SaveRefreshTokenInput {
   token: string;
 }
 
-class SaveRefreshTokenService extends BaseService<
-  SaveRefreshTokenInput,
-  RefreshToken
-> {
-  protected async transaction(
-    data: SaveRefreshTokenInput,
-  ): Promise<RefreshToken | null> {
+class SaveRefreshTokenService extends BaseService<SaveRefreshTokenInput, RefreshToken> {
+  protected async transaction(data: SaveRefreshTokenInput): Promise<RefreshToken | null> {
     return await this.database.refreshToken.create({
       data: {
         token: data.token,
         userId: data.userId,
-        expiresAt: new Date(
-          Date.now() + this.env.JWT_REFRESH_SECRET_KEY_EXPIRES_IN * 1000,
-        ),
+        expiresAt: new Date(Date.now() + this.env.JWT_REFRESH_SECRET_KEY_EXPIRES_IN * 1000),
       },
     });
   }

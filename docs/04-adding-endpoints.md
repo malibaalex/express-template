@@ -77,11 +77,7 @@ import BaseMiddleWare from "@/core/base/base-middleware.js";
 import { Request, Response, NextFunction } from "express";
 
 class CreatePostValidator extends BaseMiddleWare {
-  protected async middleware(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
+  protected async middleware(req: Request, res: Response, next: NextFunction): Promise<void> {
     const schema = this.z.object({
       title: this.z.string().min(1),
       content: this.z.string().min(1),
@@ -129,18 +125,11 @@ import { Request, Response } from "express";
 import BaseController from "@/core/base/base-controller.js";
 
 class CreatePostController extends BaseController {
-  protected async module(
-    req: Request,
-    res: Response,
-  ): Promise<void | Response> {
+  protected async module(req: Request, res: Response): Promise<void | Response> {
     const user = req.currentUser;
 
     if (!user) {
-      return this.responseHandler(
-        res,
-        this.HTTP_STATUS.UNAUTHORIZED,
-        this.HTTP_MSG.UNAUTHORIZED,
-      );
+      return this.responseHandler(res, this.HTTP_STATUS.UNAUTHORIZED, this.HTTP_MSG.UNAUTHORIZED);
     }
 
     const result = await this.Service.PostServices.CreatePost.call({
@@ -149,19 +138,10 @@ class CreatePostController extends BaseController {
     });
 
     if (!result) {
-      return this.responseHandler(
-        res,
-        this.HTTP_STATUS.BAD_REQUEST,
-        this.HTTP_MSG.BAD_REQUEST,
-      );
+      return this.responseHandler(res, this.HTTP_STATUS.BAD_REQUEST, this.HTTP_MSG.BAD_REQUEST);
     }
 
-    return this.responseHandler(
-      res,
-      this.HTTP_STATUS.CREATED,
-      this.HTTP_MSG.CREATED,
-      result,
-    );
+    return this.responseHandler(res, this.HTTP_STATUS.CREATED, this.HTTP_MSG.CREATED, result);
   }
 }
 
@@ -211,8 +191,7 @@ class CreatePostRoute implements IRoute {
       (req: Request, res: Response, next: NextFunction) =>
         MiddleWares.UserMiddleWares.UserAuth.run(req, res, next),
 
-      (req: Request, res: Response) =>
-        Controllers.PostControllers.CreatePost.execute(req, res),
+      (req: Request, res: Response) => Controllers.PostControllers.CreatePost.execute(req, res),
     );
   }
 }
