@@ -51,19 +51,16 @@ jobs:
         run: vp install --frozen-lockfile
 
       - name: Generate Prisma client
-        run: vp run prisma:generate
+        run: vp prisma:generate
 
-      - name: Deploy database migrations
-        run: vp run prisma:deploy
-
-      - name: Check (lint, format, types)
+      - name: Check
         run: vp check
 
-      - name: Test
-        run: vp run test:coverage
+      - name: Test with coverage
+        run: vp test run --coverage
 
       - name: Build
-        run: vp run build
+        run: vp build
 
   docker-build:
     needs: lint-and-build
