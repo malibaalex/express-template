@@ -50,19 +50,15 @@ jobs:
       - name: Install dependencies
         run: vp install --frozen-lockfile
 
-      # Not a vp-managed script — plain prisma binary.
       - name: Generate Prisma client
         run: pnpm prisma:generate
 
-      # vp command
       - name: Check
         run: vp check
 
-      # vp command
       - name: Test with coverage
         run: vp test run --coverage
 
-      # tsc + tsc-alias, not vp
       - name: Build
         run: pnpm build
 
@@ -81,8 +77,6 @@ jobs:
           context: .
           target: runtime
           push: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
   build-and-push:
     needs: lint-and-build
@@ -113,5 +107,3 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}:latest
             ghcr.io/${{ github.repository }}:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
