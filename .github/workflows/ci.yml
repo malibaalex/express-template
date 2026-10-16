@@ -60,7 +60,7 @@ jobs:
         run: vp test run --coverage
 
       - name: Build
-        run: vp build
+        run: pnpm build
 
   docker-build:
     needs: lint-and-build
