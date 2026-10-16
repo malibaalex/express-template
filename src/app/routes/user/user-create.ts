@@ -22,8 +22,7 @@ class CreateUserRoute implements IRoute {
       (req: Request, res: Response, next: NextFunction) =>
         MiddleWares.UserMiddleWares.CheckEmail.run(req, res, next),
 
-      (req: Request, res: Response) =>
-        Controllers.UserControllers.CreateUser.execute(req, res),
+      (req: Request, res: Response) => Controllers.UserControllers.CreateUser.execute(req, res),
     );
   }
 }

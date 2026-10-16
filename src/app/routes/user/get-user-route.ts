@@ -17,8 +17,7 @@ class GetUserRoute implements IRoute {
     this.router.route(`${this.path}profile`).get(
       (req: Request, res: Response, next: NextFunction) =>
         Middlewares.UserMiddleWares.UserAuth.run(req, res, next),
-      (req: Request, res: Response) =>
-        Controllers.UserControllers.GetUser.execute(req, res),
+      (req: Request, res: Response) => Controllers.UserControllers.GetUser.execute(req, res),
     );
   }
 }

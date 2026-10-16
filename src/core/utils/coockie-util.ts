@@ -3,9 +3,7 @@ import { Env } from "./env-utils.js";
 
 type CookieEnv = Pick<
   Env,
-  | "NODE_ENV"
-  | "JWT_ACCESS_SECRET_KEY_EXPIRES_IN"
-  | "JWT_REFRESH_SECRET_KEY_EXPIRES_IN"
+  "NODE_ENV" | "JWT_ACCESS_SECRET_KEY_EXPIRES_IN" | "JWT_REFRESH_SECRET_KEY_EXPIRES_IN"
 >;
 
 export class CookieUtils {

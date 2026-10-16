@@ -4,26 +4,15 @@ import { type User } from "@/generated/prisma/client.js";
 import { type SignIn } from "@/types/user.js";
 
 class LogInUserController extends BaseController {
-  protected async module(
-    req: Request,
-    res: Response,
-  ): Promise<void | Response> {
+  protected async module(req: Request, res: Response): Promise<void | Response> {
     const body: SignIn = req.body;
 
     const result = await this.Service.UserServices.SignInUser.call(body);
     if (!result) {
-      return this.responseHandler(
-        res,
-        this.HTTP_STATUS.BAD_REQUEST,
-        this.HTTP_MSG.BAD_REQUEST,
-      );
+      return this.responseHandler(res, this.HTTP_STATUS.BAD_REQUEST, this.HTTP_MSG.BAD_REQUEST);
     }
 
-    const userData = this.Utils.omitProperty(result as User, [
-      "salt",
-      "password",
-      "status",
-    ]);
+    const userData = this.Utils.omitProperty(result as User, ["salt", "password", "status"]);
 
     const accessToken = this.Utils.Token.signAccess({
       payload: userData,
@@ -33,11 +22,7 @@ class LogInUserController extends BaseController {
     });
 
     if (!accessToken || !refreshToken) {
-      return this.responseHandler(
-        res,
-        this.HTTP_STATUS.BAD_REQUEST,
-        this.HTTP_MSG.BAD_REQUEST,
-      );
+      return this.responseHandler(res, this.HTTP_STATUS.BAD_REQUEST, this.HTTP_MSG.BAD_REQUEST);
     }
 
     await this.Service.RefreshTokenServices.SaveRefreshToken.call({
@@ -48,12 +33,7 @@ class LogInUserController extends BaseController {
     this.Utils.Cookie.setAccessCookie(res, accessToken);
     this.Utils.Cookie.setRefreshCookie(res, refreshToken);
 
-    return this.responseHandler(
-      res,
-      this.HTTP_STATUS.SUCCESS,
-      this.HTTP_MSG.SUCCESS,
-      userData,
-    );
+    return this.responseHandler(res, this.HTTP_STATUS.SUCCESS, this.HTTP_MSG.SUCCESS, userData);
   }
 }
 

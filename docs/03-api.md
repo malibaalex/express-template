@@ -4,15 +4,15 @@ All routes are mounted under `/api`.
 
 ## Endpoints
 
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| GET | `/` | No | Welcome message |
-| POST | `/api/auth/signup` | No | Register (`fullName`, `email`, `password`) |
-| POST | `/api/auth/signin` | No | Log in (`email`, `password`) |
-| GET | `/api/auth/profile` | Yes | Current user |
-| PUT | `/api/auth/update/:id` | Yes | Update current user |
-| POST | `/api/auth/logout` | No | Revoke refresh token, clear cookies |
-| POST | `/api/auth/refresh` | No | Rotate access + refresh tokens |
+| Method | Path                   | Auth | Description                                |
+| ------ | ---------------------- | ---- | ------------------------------------------ |
+| GET    | `/`                    | No   | Welcome message                            |
+| POST   | `/api/auth/signup`     | No   | Register (`fullName`, `email`, `password`) |
+| POST   | `/api/auth/signin`     | No   | Log in (`email`, `password`)               |
+| GET    | `/api/auth/profile`    | Yes  | Current user                               |
+| PUT    | `/api/auth/update/:id` | Yes  | Update current user                        |
+| POST   | `/api/auth/logout`     | No   | Revoke refresh token, clear cookies        |
+| POST   | `/api/auth/refresh`    | No   | Rotate access + refresh tokens             |
 
 ## Response format
 

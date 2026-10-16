@@ -15,9 +15,7 @@ class LogOutRoute implements IRoute {
   private initRoute(): void {
     this.router
       .route(`${this.path}logout`)
-      .post((req: Request, res: Response) =>
-        Controllers.UserControllers.Logout.execute(req, res),
-      );
+      .post((req: Request, res: Response) => Controllers.UserControllers.Logout.execute(req, res));
   }
 }
 

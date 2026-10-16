@@ -36,11 +36,11 @@ Every folder has an `index.ts` that creates its classes and exports them as one 
 
 You extend one of these and implement a single method.
 
-| Class | You implement | You get |
-|---|---|---|
-| `BaseController` | `module(req, res)` | Call with `.execute()`. Thrown errors become a 500. |
+| Class            | You implement                | You get                                                                      |
+| ---------------- | ---------------------------- | ---------------------------------------------------------------------------- |
+| `BaseController` | `module(req, res)`           | Call with `.execute()`. Thrown errors become a 500.                          |
 | `BaseMiddleWare` | `middleware(req, res, next)` | `this.z`, `bodyHandler`, `paramHandler`, `queryHandler`. Call with `.run()`. |
-| `BaseService` | `transaction(data)` | `this.database` (Prisma). Call with `.call()`. Thrown errors become `null`. |
+| `BaseService`    | `transaction(data)`          | `this.database` (Prisma). Call with `.call()`. Thrown errors become `null`.  |
 
 All of them extend `Base`, which gives `this.Utils`, `this.Service`, `this.HTTP_STATUS`, `this.HTTP_MSG` and `this.responseHandler()`.
 

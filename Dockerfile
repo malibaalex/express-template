@@ -11,10 +11,11 @@ RUN corepack enable
 WORKDIR /app
 
 # ==============================================================================
-# STAGE 2: Dependencies
+# STAGE 2: Dependencies (dev + prod, used for building and migrations)
 # ==============================================================================
 FROM base AS deps
 
+# pnpm-workspace.yaml holds the Vite+ catalog and overrides, so it must be here
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
@@ -24,9 +25,8 @@ RUN pnpm install --frozen-lockfile
 FROM deps AS build
 
 # SECURITY:
-# This is a dummy build-time value required by Prisma config.
+# Dummy build-time value required by Prisma config.
 # Never put real credentials, API keys, or secrets in ARG/ENV here.
-# Runtime secrets must be injected by the deployment environment.
 ARG DATABASE_URL="postgresql://postgres:postgres@localhost:5432/build"
 ENV DATABASE_URL=$DATABASE_URL
 
@@ -41,7 +41,8 @@ RUN pnpm build
 FROM base AS prod-deps
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile --prod
+# --ignore-scripts: skips `prepare` (vp is a devDependency, absent here)
+RUN pnpm install --frozen-lockfile --prod --ignore-scripts
 
 # ==============================================================================
 # STAGE 5: Runtime
@@ -65,4 +66,4 @@ COPY package.json ./
 
 USER nodeapp
 
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/server.js"]
