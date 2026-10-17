@@ -2,6 +2,8 @@
 
 Tests hit the real endpoints through Supertest, against a real Postgres. No mocks, no spying on internals. If a test passes, the endpoint works.
 
+Tests run with `vp test` (Vitest, configured in the `test` block of `vite.config.ts`).
+
 ## Run
 
 Start a throwaway database once (port 5433 so it doesn't clash with your dev DB):
@@ -14,8 +16,12 @@ docker run -d --name test-db -p 5433:5432 \
 Then:
 
 ```bash
-pnpm test
+vp test                     # run once
+vp test watch               # re-run on change
+vp test run --coverage      # run once with a coverage report
 ```
+
+`vp test` runs once and does not watch by default.
 
 To use another database, set `DATABASE_URL` in your shell. The default in `tests/setup.ts` is only used when it's unset.
 
@@ -38,14 +44,18 @@ Your `.env` is never read during tests. `setup.ts` sets the variables first and 
 
 ## Writing a test
 
-Sign up through the endpoint, then use the same agent:
+Import test helpers from `vite-plus/test` (the `vite-plus/prefer-vite-plus-imports` lint rule rejects imports from `vitest`). Sign up through the endpoint, then use the same agent:
 
 ```ts
-const agent = browser();
-await agent.post(ROUTES.signup).send(newUser());
+import { expect, it } from "vite-plus/test";
 
-const res = await agent.get(ROUTES.profile);
-expect(res.status).toBe(200);
+it("returns the current user", async () => {
+  const agent = browser();
+  await agent.post(ROUTES.signup).send(newUser());
+
+  const res = await agent.get(ROUTES.profile);
+  expect(res.status).toBe(200);
+});
 ```
 
 Rules of thumb:
@@ -57,6 +67,7 @@ Rules of thumb:
 
 ## Notes
 
-- `tests/` is excluded from the production build (`tsconfig.build.json`) but still type-checked by `pnpm typecheck`.
-- Add `tests`, `coverage` and `vitest.config.ts` to `.dockerignore` so they stay out of the image.
-- CI starts a Postgres service and runs `pnpm test:coverage`. See `.github/workflows/ci.yml`.
+- `tests/` is excluded from the production build (`tsconfig.build.json`) but still type-checked by `vp check` and `vp run typecheck`.
+- Coverage covers `src/**/*.ts`, except `src/server.ts` and `src/types/**` (see the `test.coverage` block in `vite.config.ts`).
+- Add `tests`, `coverage` and `vite.config.ts` to `.dockerignore` so they stay out of the image.
+- CI sets up Vite+, starts a Postgres service and runs `vp test run --coverage`. See `.github/workflows/ci.yml`.

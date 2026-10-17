@@ -8,9 +8,21 @@ Pick one path:
 | B. Container platform | Docker image              | Managed hosting, same image as A |
 | C. Vercel             | Source code as a function | Small APIs, git-push deploys     |
 
-A and B use the same Docker image. CI builds it and pushes it to `ghcr.io/<owner>/<repo>` on every push to `develop`, but only if lint, format, typecheck, tests and build all pass. C doesn't use the image at all.
+A and B use the same Docker image. CI builds it and pushes it to `ghcr.io/<owner>/<repo>` on every push to `develop`, but only if `vp check`, the tests and the build all pass. C doesn't use the image at all.
 
 Never bake secrets into the image. Every option injects them at runtime.
+
+**You don't need Vite+ in production.** The deployed server is plain Node (`node dist/server.js`), built with `tsc`. `vp` is only used in development and in CI. The production commands below use `pnpm` directly, so servers, containers and Vercel don't need it installed.
+
+---
+
+## CI pipeline
+
+`.github/workflows/ci.yml` runs on pushes and pull requests to `develop`:
+
+1. **lint-and-build**: sets up Vite+ (`voidzero-dev/setup-vp`, Node version from `.node-version`), starts a Postgres service, then runs `vp install --frozen-lockfile`, `pnpm prisma:generate`, `vp check`, `vp test run --coverage` and `pnpm build`.
+2. **docker-build** (pull requests only): builds the `runtime` image without pushing it.
+3. **build-and-push** (pushes to `develop` only): builds the `runtime` image and pushes it to GHCR as `latest` and the commit SHA.
 
 ---
 
@@ -77,6 +89,8 @@ pnpm install --frozen-lockfile
 DATABASE_URL="<managed db url>" pnpm prisma:deploy
 ```
 
+In a GitHub Actions job that already has Vite+ set up, the equivalent is `vp install --frozen-lockfile` and `vp run prisma:deploy`.
+
 Store the real `DATABASE_URL` as a repository secret and use it only in this step. Don't reuse the dummy value from the build job. If your platform runs the release command from your image, use the `build` target (it contains Prisma), not `runtime`.
 
 Always use `prisma migrate deploy` in production, never `migrate dev`.
@@ -113,7 +127,7 @@ if (!process.env.VERCEL) {
 export default app.instance;
 ```
 
-`pnpm dev` and Docker keep working because `VERCEL` is only set on Vercel.
+`vp run dev` and Docker keep working because `VERCEL` is only set on Vercel.
 
 ### Steps
 
@@ -130,7 +144,7 @@ export default app.instance;
 }
 ```
 
-The Prisma client is generated into `src/generated/prisma` (gitignored), so it has to be generated at build time. `pnpm build` already uses `tsconfig.build.json`, so tests are excluded. You can set the same command in Project Settings instead; if both exist, `vercel.json` wins.
+The Prisma client is generated into `src/generated/prisma` (gitignored), so it has to be generated at build time. `pnpm build` already uses `tsconfig.build.json`, so tests are excluded. Vercel builds with pnpm, so you don't need `vp` there. You can set the same command in Project Settings instead; if both exist, `vercel.json` wins.
 
 **4. Set environment variables** (Project Settings → Environment Variables) for Production and Preview, and make them available at build time because `prisma.config.ts` reads `DATABASE_URL`:
 
@@ -151,7 +165,7 @@ Run it before promoting a deployment that changes the schema.
 curl https://<your-project>.vercel.app/
 ```
 
-> **Check on the first preview deploy:** the `@/` path aliases. Your build resolves them with `tsc-alias`, but Vercel compiles the entry file itself and may not. If imports fail, switch to relative imports or bundle with `tsup`/`esbuild`. Also confirm the entry file location against Vercel's Express docs.
+> **Check on the first preview deploy:** the `@/` path aliases. Your build resolves them with `tsc-alias`, but Vercel compiles the entry file itself and may not. If imports fail, switch to relative imports or bundle with `tsup`/`esbuild`. Also confirm the entry file location against Vercel's Express docs. Also confirm the `prepare` script (`vp config || true`) doesn't fail the install; the `|| true` is there for this reason.
 
 ### Limits to know
 

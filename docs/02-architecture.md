@@ -28,6 +28,7 @@ src/
   generated/prisma/     Generated client (gitignored)
   types/                Shared types
 tests/                  Endpoint tests (not part of the build)
+vite.config.ts          Tooling config: tests, lint, format, Git hooks
 ```
 
 Every folder has an `index.ts` that creates its classes and exports them as one object. That's why you call things like `Controllers.UserControllers.SignIn` and why adding a feature always ends with "register it in the index".
@@ -56,9 +57,24 @@ Services return `null` on failure instead of throwing, so controllers check `if 
 
 - Imports use the `@/` alias and a `.js` extension: `import Base from "@/core/base/base.js"`.
 - Prisma fields are camelCase (`userId`) and mapped to snake_case columns with `@map`.
-- Prettier: double quotes, semicolons, trailing commas, 80 columns.
+- Formatting and linting are `vp check`'s job (Oxfmt and Oxlint). Run `vp check --fix` before you commit; the Git hook also does it for staged files.
+- Import test helpers from `vite-plus/test`, not `vitest`. The lint rule `vite-plus/prefer-vite-plus-imports` enforces this.
+
+## Tooling
+
+Everything is configured in one file, `vite.config.ts`:
+
+| Block     | What it controls                                                   |
+| --------- | ------------------------------------------------------------------ |
+| `resolve` | The `@/` alias to `src/`                                           |
+| `test`    | Vitest: test files, global setup, coverage                         |
+| `lint`    | Oxlint: ignored paths, rules, type-aware linting and type-checking |
+| `fmt`     | Oxfmt: formatter options                                           |
+| `staged`  | What runs on staged files at commit (`vp check --fix`)             |
+
+Vite+ is only used for development tooling. The server itself runs with plain Node (`node dist/server.js`), and `vp dev`/`vp build` (Vite's dev server and bundler) are not used.
 
 ## TypeScript configs
 
-- `tsconfig.json` covers `src` and `tests`. Used by the editor, `typecheck` and ESLint.
-- `tsconfig.build.json` covers `src` only. Used by `pnpm build`, so tests never reach `dist/`.
+- `tsconfig.json` covers `src` and `tests`. Used by the editor, `vp run typecheck` and type-aware linting in `vp check`.
+- `tsconfig.build.json` covers `src` only. Used by `vp run build`, so tests never reach `dist/`.
