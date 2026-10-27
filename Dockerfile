@@ -1,69 +1,22 @@
-# ==============================================================================
-# STAGE 1: Base
-# ==============================================================================
-FROM node:24-bookworm-slim AS base
-
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-
+FROM node:24-bookworm-slim AS build
 RUN corepack enable
-
 WORKDIR /app
 
-# ==============================================================================
-# STAGE 2: Dependencies (dev + prod, used for building and migrations)
-# ==============================================================================
-FROM base AS deps
-
-# pnpm-workspace.yaml holds the Vite+ catalog and overrides, so it must be here
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
-# ==============================================================================
-# STAGE 3: Build
-# ==============================================================================
-FROM deps AS build
-
-# SECURITY:
-# Dummy build-time value required by Prisma config.
-# Never put real credentials, API keys, or secrets in ARG/ENV here.
-ARG DATABASE_URL="postgresql://postgres:postgres@localhost:5432/build"
-ENV DATABASE_URL=$DATABASE_URL
-
+ENV DATABASE_URL="postgresql://postgres:postgres@localhost:5432/build"
 COPY . .
+RUN pnpm prisma:generate && pnpm build
 
-RUN pnpm prisma:generate
-RUN pnpm build
+FROM build AS prod-deps
+RUN pnpm prune --prod
 
-# ==============================================================================
-# STAGE 4: Production dependencies
-# ==============================================================================
-FROM base AS prod-deps
-
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-# --ignore-scripts: skips `prepare` (vp is a devDependency, absent here)
-RUN pnpm install --frozen-lockfile --prod --ignore-scripts
-
-# ==============================================================================
-# STAGE 5: Runtime
-# ==============================================================================
 FROM node:24-bookworm-slim AS runtime
-
 ENV NODE_ENV=production
-
 WORKDIR /app
-
-RUN groupadd --system nodeapp && \
-    useradd --system --gid nodeapp nodeapp
-
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY package.json ./
-
-# SECURITY:
-# Do not bake DATABASE_URL, JWT secrets, API keys, or other credentials
-# into the image. Inject them at runtime through the hosting environment.
-
-USER nodeapp
-
+USER node
 CMD ["node", "dist/server.js"]

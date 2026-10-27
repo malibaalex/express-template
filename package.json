@@ -2,51 +2,59 @@
   "name": "server",
   "version": "1.0.0",
   "description": "",
-  "keywords": [],
-  "license": "ISC",
-  "author": "",
-  "type": "module",
   "main": "dist/server.js",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "nodemon",
     "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "start": "node dist/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
-    "test": "vp test run",
-    "test:coverage": "vp test run --coverage",
-    "check": "vp check",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:deploy": "prisma migrate deploy",
-    "prepare": "vp config || true"
+    "prisma:deploy": "prisma migrate deploy"
   },
-  "dependencies": {
-    "@prisma/adapter-pg": "7.10.0",
-    "@prisma/client": "7.10.0",
-    "cookie-parser": "^1.4.7",
-    "dotenv": "^17.4.1",
-    "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3",
-    "zod": "^4.3.6"
-  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@12.15.0",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.0.0",
     "@types/supertest": "^7.2.1",
-    "@vitest/coverage-v8": "catalog:",
-    "prisma": "7.10.0",
+    "@vitest/coverage-v8": "^5.0.3",
+    "eslint": "^10.2.0",
+    "eslint-config-prettier": "^10.1.8",
+    "nodemon": "^3.1.14",
+    "prettier": "^3.8.1",
+    "prisma": "^7.6.0",
     "supertest": "^7.3.1",
     "tsc-alias": "^1.8.10",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2",
-    "vite-plus": "catalog:",
-    "vitest": "catalog:"
+    "typescript-eslint": "^8.58.0",
+    "vitest": "^5.0.3"
   },
-  "engines": {
-    "node": ">=24"
-  },
-  "packageManager": "pnpm@12.11.2"
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.6.0",
+    "@prisma/client": "^7.6.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "zod": "^4.3.6"
+  }
 }
