@@ -12,7 +12,11 @@ class SignInUserService extends BaseService<SignIn, User> {
 
     if (!result) return null;
 
-    const isPassword = await this.Password.compare(data.password, result.password, result.salt);
+    const isPassword = await this.Password.compare(
+      data.password,
+      result.password,
+      result.salt,
+    );
 
     if (!isPassword) return null;
 

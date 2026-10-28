@@ -25,7 +25,8 @@ class UpdateUserRoute implements IRoute {
       (req: Request, res: Response, next: NextFunction) =>
         MiddleWares.UserMiddleWares.UserAuth.run(req, res, next),
 
-      (req: Request, res: Response) => Controllers.UserControllers.Update.execute(req, res),
+      (req: Request, res: Response) =>
+        Controllers.UserControllers.Update.execute(req, res),
     );
   }
 }

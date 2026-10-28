@@ -24,8 +24,8 @@ model Post {
 Add `posts Post[]` to the `User` model, then:
 
 ```bash
-vp run prisma:migrate
-vp run prisma:generate
+pnpm prisma:migrate
+pnpm prisma:generate
 ```
 
 ## 2. Type
@@ -226,6 +226,7 @@ Done: `POST /api/posts/create` is live.
 Add `tests/posts/create-post.test.ts` (see [Testing](05-testing.md)), then:
 
 ```bash
-vp check --fix   # format, lint, type-check
-vp test          # run the tests
+pnpm format && pnpm lint --fix   # fix formatting and lint issues
+pnpm check                       # lint, format check and type-check, same as CI
+pnpm test                        # run the tests
 ```

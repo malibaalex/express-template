@@ -1,22 +1,11 @@
 # Getting Started
 
-You need [Vite+](https://viteplus.dev) (`vp`), Node.js 24+, and a PostgreSQL database (local, Neon, Supabase, anything). pnpm is the package manager (pinned in `packageManager`), and `vp install` uses it for you.
-
-Install Vite+:
+You need Node.js 24+, pnpm (pinned in `packageManager`, enable it with `corepack enable`), and a PostgreSQL database (local, Neon, Supabase, anything).
 
 ```bash
-curl -fsSL https://vite.plus | bash   # macOS / Linux
-irm https://vite.plus/ps1 | iex       # Windows (PowerShell)
-```
-
-Then, in the project:
-
-```bash
-vp install
+pnpm install
 cp .env.example .env
 ```
-
-`vp install` also sets up the Git hooks (the `prepare` script runs `vp config`). On commit, staged files go through `vp check --fix`.
 
 ## Environment variables
 
@@ -36,30 +25,24 @@ Set these in `.env`. They are validated at startup in `src/core/utils/env-utils.
 ## Database
 
 ```bash
-vp run prisma:generate   # generate the client (needed after every schema change)
-vp run prisma:migrate    # create and apply a migration in dev
+pnpm prisma:generate   # generate the client (needed after every schema change)
+pnpm prisma:migrate    # create and apply a migration in dev
 ```
 
 ## Scripts
 
-| Command                  | What it does                                       |
-| ------------------------ | -------------------------------------------------- |
-| `vp install`             | Install dependencies                               |
-| `vp run dev`             | Dev server with hot reload (`tsx watch`)           |
-| `vp run build`           | Compile to `dist/` (`tsc` + `tsc-alias`)           |
-| `vp run start`           | Run the compiled server                            |
-| `vp test`                | Run the endpoint tests once                        |
-| `vp test watch`          | Re-run tests on change                             |
-| `vp test run --coverage` | Tests plus a coverage report                       |
-| `vp check`               | Format check, lint and type-check in one pass      |
-| `vp check --fix`         | Same, and auto-fix what it can                     |
-| `vp lint` / `vp fmt`     | Run the linter or the formatter on their own       |
-| `vp run typecheck`       | Plain `tsc --noEmit` (`vp check` also type-checks) |
-| `vp run prisma:deploy`   | Apply migrations in production                     |
+| Command              | What it does                                     |
+| -------------------- | ------------------------------------------------ |
+| `pnpm dev`           | Dev server with hot reload (nodemon)             |
+| `pnpm build`         | Compile to `dist/` (`tsc` + `tsc-alias`)         |
+| `pnpm start`         | Run the compiled server                          |
+| `pnpm test`          | Run the endpoint tests once                      |
+| `pnpm test:watch`    | Re-run tests on change                           |
+| `pnpm test:coverage` | Tests plus a coverage report                     |
+| `pnpm check`         | Lint, format check and type-check (what CI runs) |
+| `pnpm lint`          | ESLint (add `--fix` to auto-fix)                 |
+| `pnpm format`        | Prettier, writes changes                         |
+| `pnpm typecheck`     | `tsc --noEmit`                                   |
+| `pnpm prisma:deploy` | Apply migrations in production                   |
 
-> **`vp dev` and `vp build` are not the same as `vp run dev` and `vp run build`.**
-> `vp dev` and `vp build` are Vite built-ins (dev server and bundler). This is a plain Node server, so use `vp run dev` and `vp run build`, which run the scripts from `package.json`.
-
-The scripts in `package.json` are normal scripts, so `pnpm dev`, `pnpm build` and so on also work. Production and Docker only need pnpm and Node, never `vp` (see [Deployment](06-deployment.md)).
-
-CI sets up Vite+, installs with `vp install --frozen-lockfile`, generates the Prisma client, then runs `vp check`, `vp test run --coverage` and the build, in that order.
+There are no Git hooks, so run `pnpm check` before you commit. CI runs `pnpm check` and `pnpm test`, then builds the Docker image.

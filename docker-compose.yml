@@ -1,7 +1,4 @@
 services:
-  # ============================================================================
-  # API
-  # ============================================================================
   api:
     image: ${IMAGE_NAME:-ghcr.io/owner/repo}:latest
     build:
@@ -9,43 +6,31 @@ services:
       target: runtime
     ports:
       - "${PORT:-4001}:${PORT:-4001}"
-    env_file:
-      - .env
+    env_file: .env
     environment:
       DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD}@db:5432/${DB_NAME:-app_db}
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
-    networks:
-      - app-network
 
-  # ============================================================================
-  # DATABASE MIGRATIONS
-  # ============================================================================
   migrate:
     build:
       context: .
       target: build
-    profiles:
-      - tools
+    profiles: [tools]
     command: pnpm exec prisma migrate deploy
     environment:
       DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD}@db:5432/${DB_NAME:-app_db}
     depends_on:
       db:
         condition: service_healthy
-    networks:
-      - app-network
 
-  # ============================================================================
-  # POSTGRES
-  # ============================================================================
   db:
     image: postgres:17-alpine
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
       POSTGRES_DB: ${DB_NAME:-app_db}
     ports:
       - "127.0.0.1:5432:5432"
@@ -57,12 +42,6 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
 
 volumes:
   db_data:

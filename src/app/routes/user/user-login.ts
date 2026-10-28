@@ -18,7 +18,8 @@ class SignInUserRoute implements IRoute {
       (req: Request, res: Response, next: NextFunction) =>
         Validators.UserValidators.SignIn.run(req, res, next),
 
-      (req: Request, res: Response) => Controllers.UserControllers.SignIn.execute(req, res),
+      (req: Request, res: Response) =>
+        Controllers.UserControllers.SignIn.execute(req, res),
     );
   }
 }
