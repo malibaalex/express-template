@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 import Util from "@/core/utils/index.js";
 import Services from "@/database/services/index.js";
 import { HTTP_MSG, HTTP_STATUS } from "../utils/constants.js";
@@ -10,17 +10,24 @@ class Base {
   protected readonly HTTP_MSG = HTTP_MSG;
 
   protected listening(port: number | boolean): string {
+    const message = `App listening on port ${port}`;
+
     if (this.Utils.env.NODE_ENV === "development") {
-      console.log(`server running on port ${port}`);
+      console.log(message);
     }
-    return `App listening on port ${port}`;
+
+    return message;
   }
 
-  protected welcome(_req: Request, res: Response) {
+  protected welcome(_req: Request, res: Response): Response {
     return this.responseHandler(
       res,
       this.HTTP_STATUS.SUCCESS,
       this.HTTP_MSG.WELCOME,
+      {
+        timestamp: new Date().toISOString(),
+        port: this.Utils.port,
+      },
     );
   }
 
@@ -30,7 +37,11 @@ class Base {
     message: string,
     data?: unknown,
   ): Response {
-    return res.status(httpCode).json({ status: httpCode, message, data });
+    return res.status(httpCode).json({
+      status: httpCode,
+      message,
+      data,
+    });
   }
 }
 
